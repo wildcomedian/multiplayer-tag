@@ -33,6 +33,7 @@ public class Camera {
 	
 	private Vector2D goalPosition;
 	
+	//add param for player
 	public Camera(int width, int height, int borderLeft, int borderRight, int borderBot) {
 		this.position = new Vector2D();
 		this.goalPosition = new Vector2D();
