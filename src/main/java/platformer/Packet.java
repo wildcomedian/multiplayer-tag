@@ -1,9 +1,5 @@
 package platformer;
-
 import java.io.Serializable;
-
-import platformer.code.gameengine.graphics.Camera;
-import platformer.code.gamelogic.player.Player;
 
 public class Packet implements Serializable {
     
