@@ -22,7 +22,8 @@ public class Packet implements Serializable {
         return x;
     }
     public float getY(){
-        return y;
+        return y; 
+        
     }
     public boolean isIt(){
         return isIt;
