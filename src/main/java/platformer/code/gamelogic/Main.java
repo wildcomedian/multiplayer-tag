@@ -23,7 +23,7 @@ public class Main extends GameBase implements PlayerDieListener, PlayerWinListen
 	private ScreenTransition screenTransition = new ScreenTransition();
 
 	private LevelData[] levels;
-	private Level currentLevel;
+	protected Level currentLevel;
 	private int currentLevelIndex;
 	private boolean active;
 	
@@ -44,15 +44,15 @@ public class Main extends GameBase implements PlayerDieListener, PlayerWinListen
 
 		currentLevelIndex = 0;
 
-		levels = new LevelData[2];
+		levels = new LevelData[2]; //Instantiates an array that holds two levels (data)
 		try {
 			//levels[0] = LeveldataLoader.loadLeveldata("src/main/java/platformer/maps/map1.txt");
-			levels[0] = LeveldataLoader.loadLeveldata("src/main/java/platformer/maps/tagYourIt.txt");
+			levels[0] = LeveldataLoader.loadLeveldata("src/main/java/platformer/maps/tagYourIt.txt"); //Our data
 			levels[1] = LeveldataLoader.loadLeveldata("src/main/java/platformer/maps/map1.txt");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		currentLevel = new Level(levels[currentLevelIndex]);
+		currentLevel = new Level(levels[currentLevelIndex]); //Makes the current level the one from the 
 
 		currentLevel.addPlayerDieListener(this);
 		currentLevel.addPlayerWinListener(this);
@@ -85,7 +85,6 @@ public class Main extends GameBase implements PlayerDieListener, PlayerWinListen
 	public void onTransitionFinished() {
 		active = true;
 	}
-
 	//-----------------------------------------------Player Listener
 	@Override
 	public void onPlayerDeath() {
@@ -138,6 +137,9 @@ public class Main extends GameBase implements PlayerDieListener, PlayerWinListen
 		
 		drawBackground(g);
 		//Camera-translate
+		//some sort of "update from server"
+		//that should change currentLevel
+		//then currentLevel.draw... draws that change
 		currentLevel.draw(g);
 		//- Camera-translate
 		

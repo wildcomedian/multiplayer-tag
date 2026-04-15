@@ -1,8 +1,10 @@
 package platformer;
 
 import java.io.EOFException;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -12,36 +14,76 @@ import java.util.concurrent.ArrayBlockingQueue;
 import platformer.code.gamelogic.Main;
 import platformer.code.gamelogic.level.Level;
 
-public class Server {
+public class Server implements Runnable{
+    public static final int PORT = 2017;
+
     private ServerSocket listener;
     private Socket connection;
     private static ArrayList<ConnectionHandler> handlers = new ArrayList<ConnectionHandler>();
     private static ArrayBlockingQueue<Packet> messageQueue = new ArrayBlockingQueue<>(100);
- 
+    private boolean serverRunning;
 
     private Level level;
     private Main game;
 
+    public Server() {
+        serverRunning = false;
+    }
+
     public static void main(String[] args) {
         Server server = new Server();
+        server.run();
+    }
+
+    @Override
+    public void run() {
+        try {
+            listener = new ServerSocket(PORT);
+            serverRunning = true;
+            while (serverRunning) {
+                connection = listener.accept(); // Listens for client to connect to the Server
+                ConnectionHandler handler = new ConnectionHandler(connection);
+                handlers.add(handler);
+            }
+        } catch (IOException e) {
+            // TODO: Make a way to deal with when a connection fails
+            shutdown();
+        }
+    }
+
+    private void broadcastAllPlayers(Packet gameState) {
+        for (ConnectionHandler handler: handlers) {
+            handler.sendPacket(gameState);
+        }
+    }
+
+    private void shutdown() {
+        serverRunning = false;
+        try {
+            if (!listener.isClosed())
+                listener.close();
+        } catch (IOException e) {
+            // TODO: handle exception
+        }
     }
 
     private static class ConnectionHandler extends Thread {
-        Socket client;
-        ObjectOutputStream oos; //you'll need to define this one for when you're ready to talk back to the client!
-        ObjectInputStream ois;
+        private Socket client;
+        private ObjectOutputStream oos;
+        private ObjectInputStream ois;
         ConnectionHandler(Socket socket) {
             client = socket;
             try {
                 oos = new ObjectOutputStream(client.getOutputStream());
                 ois = new ObjectInputStream(client.getInputStream());
             }
-            catch(Exception e){}
+            catch(Exception e){
+            }
         }
  
-        public void sendMessage(String message) {
+        public void sendPacket(Packet gameState) {
             try {
-                oos.writeObject(message);
+                oos.writeObject(gameState);
                 oos.flush();
             } catch (Exception e) {
                 System.out.println("Error sending to client: " + e);
@@ -52,7 +94,10 @@ public class Server {
             String clientAddress = client.getInetAddress().toString();
             while(true) {
                 try {
-                    Packet gameState = (Packet) ois.readObject();
+                    Packet clientInfo = (Packet) ois.readObject();
+
+                    //Process clientInfo and update the game accordingly
+            
                     // if(!message.equals("disconnect")){
                     //     System.out.println(message);
                     //     messageQueue.put(Packet);
