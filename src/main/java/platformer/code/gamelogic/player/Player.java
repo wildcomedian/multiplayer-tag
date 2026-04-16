@@ -15,12 +15,14 @@ public class Player extends PhysicsObject{
 	public float jumpPower = 1350;
 
 	private boolean isJumping = false;
+	private static int id = 0;
 
 	public Player(float x, float y, Level level) {
 	
 		super(x, y, level.getLevelData().getTileSize(), level.getLevelData().getTileSize(), level);
 		int offset =(int)(level.getLevelData().getTileSize()*0.1); //hitbox is offset by 10% of the player size.
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
+		id++;
 	}
 
 	@Override
@@ -28,7 +30,7 @@ public class Player extends PhysicsObject{
 		super.update(tslf);
 		
 		movementVector.x = 0;
-		if(PlayerInput.isLeftKeyDown()) {
+		if(PlayerInput.isLeftKeyDown() ) {
 			movementVector.x = -walkSpeed;
 		}
 		if(PlayerInput.isRightKeyDown()) {

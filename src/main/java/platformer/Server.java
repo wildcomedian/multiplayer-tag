@@ -67,6 +67,10 @@ public class Server implements Runnable{
         }
     }
 
+    public Level getlLevel() {
+        return level;
+    }
+
     private static class ConnectionHandler extends Thread {
         private Socket client;
         private ObjectOutputStream oos;
@@ -97,7 +101,8 @@ public class Server implements Runnable{
                     Packet clientInfo = (Packet) ois.readObject();
 
                     //Process clientInfo and update the game accordingly
-            
+
+
                     // if(!message.equals("disconnect")){
                     //     System.out.println(message);
                     //     messageQueue.put(Packet);

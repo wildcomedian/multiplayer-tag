@@ -27,9 +27,8 @@ public class Level {
 	private Map map;
 	private Enemy[] enemies;
 	public static Player player;
-	public static Player multiPlayer;
+	private static ArrayList<Player> listOfPlayers;
 	private Camera camera;
-	private Camera multiPlayerCamera;
 
 	private boolean active;
 	private boolean playerDead;
@@ -131,7 +130,7 @@ public class Level {
 		}
 		player = new Player(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),
 				this);
-		multiPlayer = new Player(leveldata.getPlayerX() * map.getTileSize() + 50, leveldata.getPlayerY() * map.getTileSize(),
+		listOfPlayersnew Player(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),
 				this);
 		camera.setFocusedObject(player);
 
@@ -156,7 +155,6 @@ public class Level {
 		if (active) {
 			// Update the player
 			player.update(tslf);
-			multiPlayer.update(tslf);
 
 			// Player death
 			if (map.getFullHeight() + 100 < player.getY())
@@ -228,7 +226,6 @@ public class Level {
 
 		// Draw the player
 		player.draw(g);
-		multiPlayer.draw(g);
 
 		// used for debugging
 		if (Camera.SHOW_CAMERA)

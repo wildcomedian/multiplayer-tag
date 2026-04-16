@@ -13,7 +13,7 @@ import platformer.code.gamelogic.Main;
 import platformer.code.gamelogic.player.Player;
 
 public class Client extends Main {
-    int id;
+    private static int id = 0;
     Socket socket;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
@@ -27,7 +27,7 @@ public class Client extends Main {
     }
 
     public Client() {
-
+        id++;
 
         try {
             String host = "localhost";
