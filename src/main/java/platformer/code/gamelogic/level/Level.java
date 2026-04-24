@@ -11,6 +11,7 @@ import platformer.code.gameengine.loaders.Tileset;
 import platformer.code.gamelogic.GameResources;
 import platformer.code.gamelogic.Main;
 import platformer.code.gamelogic.enemies.Enemy;
+import platformer.code.gamelogic.player.DummyPlayer;
 import platformer.code.gamelogic.player.Player;
 import platformer.code.gamelogic.tiledMap.Map;
 import platformer.code.gamelogic.tiles.Flag;
@@ -27,7 +28,7 @@ public class Level {
 	private Map map;
 	private Enemy[] enemies;
 	public static Player player;
-	private static ArrayList<Player> listOfPlayers;
+	public static ArrayList<DummyPlayer> listOfPlayers = new ArrayList<DummyPlayer>();
 	private Camera camera;
 
 	private boolean active;
@@ -53,6 +54,7 @@ public class Level {
 		width = mapdata.getWidth();
 		height = mapdata.getHeight();
 		tileSize = mapdata.getTileSize();
+		listOfPlayers.add(new DummyPlayer(leveldata.getPlayerX(), leveldata.getPlayerY(), this));
 		restartLevel();
 	}
 
@@ -130,8 +132,6 @@ public class Level {
 		}
 		player = new Player(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),
 				this);
-		listOfPlayersnew Player(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),
-				this);
 		camera.setFocusedObject(player);
 
 		active = true;
@@ -154,7 +154,11 @@ public class Level {
 	public void update(float tslf) {
 		if (active) {
 			// Update the player
-			player.update(tslf);
+			if (listOfPlayers.size() > 0) {
+				for (DummyPlayer dp: listOfPlayers) {
+					dp.update(tslf);
+				}
+			}
 
 			// Player death
 			if (map.getFullHeight() + 100 < player.getY())
@@ -276,4 +280,8 @@ public class Level {
 	public Player getPlayer() {
 		return player;
 	}
+
+    public ArrayList<DummyPlayer> getListOfPlayers() {
+        return listOfPlayers;
+    }
 }
