@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 
 import platformer.code.gamelogic.Main;
+import platformer.code.gamelogic.player.DummyPlayer;
 import platformer.code.gamelogic.player.Player;
 
 public class Client extends Main {
@@ -53,7 +54,21 @@ public class Client extends Main {
                 try {
                     Packet serverPacket = (Packet) ois.readObject();
                     // Do Stuff with serverPacket figure out
-                    serverPacket.isIt();
+                    int packetId = serverPacket.getPlayerId();
+                    float newX = serverPacket.getX();
+                    float newY = serverPacket.getY();
+                    if (currentLevel != null && (currentLevel.getListOfPlayers() != null) && (packetId > currentLevel.getListOfPlayers().size() + 1)) {
+                        currentLevel.getListOfPlayers().add(new DummyPlayer(newX + 200, newY + 200, currentLevel));
+                    }
+                    else if (currentLevel != null && packetId < currentLevel.getListOfPlayers().size() + 1){
+                        
+                        for (DummyPlayer dp: currentLevel.getListOfPlayers()) {
+                            if (dp.getId() == packetId) {
+                                dp.setPosition(newX, newY);
+                            }
+                        }
+                        serverPacket.isIt();
+                    }
                     
     
                     sendPacket(serverPacket);
