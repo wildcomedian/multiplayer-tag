@@ -30,14 +30,9 @@ public class DummyPlayer extends PhysicsObject{
 		return id;
 	}
 
-    public void setPosition(float x, float y) {
-        position.x = x;
-        position.y = y;
-    }
-
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.YELLOW);
+		g.setColor(Color.BLUE);
 		MyGraphics.fillRectWithOutline(g, (int)getX(), (int)getY(), width, height);
 		
 		if(Main.DEBUGGING) {
@@ -51,5 +46,24 @@ public class DummyPlayer extends PhysicsObject{
 		}
 		
 		hitbox.draw(g);
+	}
+	
+	@Override
+	public void update(float tslf) {
+		super.update(tslf);
+		
+		isJumping = true;
+		if(collisionMatrix[BOT] != null) isJumping = false;
+	}
+	
+	public void setMovementVector(float x, float y) {
+		movementVector.x = x;
+		movementVector.y = y;
+	}
+	
+	public void setPosition(float x, float y) {
+		position.x = x;
+		position.y = y;
+		
 	}
 }

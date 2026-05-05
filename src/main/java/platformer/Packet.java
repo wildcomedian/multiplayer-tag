@@ -33,4 +33,7 @@ public class Packet implements Serializable {
         this.isIt = isIt;
     }
     
+    public String toString(){
+        return "PacketId: " + playerId + ", Player Location: (" + x + ", " + y + "), isIt: " + isIt;
+    }
 }
