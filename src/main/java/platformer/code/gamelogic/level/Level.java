@@ -27,8 +27,8 @@ public class Level {
 	private LevelData leveldata;
 	private Map map;
 	private Enemy[] enemies;
-	public static Player player;
-	public static ArrayList<DummyPlayer> listOfPlayers = new ArrayList<DummyPlayer>();
+	public Player player;
+	public ArrayList<DummyPlayer> listOfPlayers = new ArrayList<DummyPlayer>();
 	private Camera camera;
 
 	private boolean active;
@@ -132,10 +132,6 @@ public class Level {
 		player = new Player(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),
 				this);
 
-		listOfPlayers.add(new DummyPlayer(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),
-				this));
-
-
 		camera.setFocusedObject(player);
 
 		active = true;
@@ -159,11 +155,6 @@ public class Level {
 		if (active) {
 			// Update the player
 			player.update(tslf);
-
-			//Update all dummy players
-			for (DummyPlayer dp: listOfPlayers) {
-				dp.update(tslf);
-			}
 
 			// Player death
 			if (map.getFullHeight() + 100 < player.getY())
@@ -291,7 +282,11 @@ public class Level {
 		return player;
 	}
 
-    public static ArrayList<DummyPlayer> getListOfPlayers() {
+    public ArrayList<DummyPlayer> getListOfPlayers() {
         return listOfPlayers;
     }
+
+	public void addDummyPlayer() {
+		listOfPlayers.add(new DummyPlayer(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),this));
+	}
 }

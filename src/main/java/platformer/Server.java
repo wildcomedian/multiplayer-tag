@@ -62,6 +62,10 @@ public class Server implements Runnable{
             serverRunning = true;
             System.out.println("Server listening on port  " + PORT);
 
+            Runnable task = () -> broadcastAllPlayers(); // Creates a runnable task: Calling sendPositions
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(); //Makes this ScheduledExecutorService to start running a task at fixed intervals
+            scheduler.scheduleAtFixedRate(task, 1000, 1000/60, TimeUnit.MILLISECONDS); //Sets the scheduler to run the sendPositions task every 1 millisecond, starting after 1000 milliseconds (1 second)
+
             while (serverRunning){
                 connection = listener.accept();
                 int assignedId = nextPlayerId;
@@ -103,15 +107,9 @@ public class Server implements Runnable{
     //     }
     // }
     
-    private static void broadcastAllPlayers(Object broadcast) {
+    private static void broadcastAllPlayers() {
         for (ConnectionHandler h : handlers) {
-            try {
-                h.oos.writeObject(broadcast);
-                h.oos.flush();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                System.out.println("Unable to broadcast the Player " + h.assignedId + ".");
-            }
+            h.sendPositions();
         }
     }
 
@@ -143,10 +141,6 @@ public class Server implements Runnable{
                 // TODO: handle exception
                 e.printStackTrace();
             }
-            /* Creates and executes (runs) a thread to send the client the other players positions */
-            Runnable task = () -> sendPositions(); // Creates a runnable task: Calling sendPositions
-            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(); //Makes this ScheduledExecutorService to start running a task at fixed intervals
-            scheduler.scheduleAtFixedRate(task, 1000, 1000/60, TimeUnit.MILLISECONDS); //Sets the scheduler to run the sendPositions task every 1 millisecond, starting after 1000 milliseconds (1 second)
         }
  
         public void sendPositions() {

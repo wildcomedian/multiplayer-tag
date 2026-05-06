@@ -38,6 +38,7 @@ public class Client extends Main {
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
             connected = true;
+            
             //Creating and starting PacketInputHandler to read packets from the connected server
             PacketInputHandler inputHandler = new PacketInputHandler();
             inputHandler.start();
@@ -70,14 +71,8 @@ public class Client extends Main {
             while (connected) {
                 try {
                     ArrayList<Packet> serverPackets = (ArrayList<Packet>) ois.readObject();
-                    Packet serverPacket = serverPackets.get(id - 1);
-                    // System.out.println(serverPacket);
-                    // Do Stuff with serverPacket figure out
-                    int packetId = serverPacket.getPlayerId();
-                    float newX = serverPacket.getX();
-                    float newY = serverPacket.getY();
-                  
-                    currentLevel.getListOfPlayers().get(packetId-1).setPosition(newX, newY);
+                    if (serverPackets.size() != 1)
+                        updateDummyPlayers(serverPackets);
                 } catch (ClassNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -95,6 +90,21 @@ public class Client extends Main {
             oos.flush();
         } catch (Exception e) {
             // TODO: handle exception
+        }
+    }
+
+    public void updateDummyPlayers(ArrayList<Packet> playerPackets) {
+        for (Packet playerPacket: playerPackets) {
+            int packetId = playerPacket.getPlayerId();
+            if ((currentLevel != null) && (packetId != id)) {
+                int correspondingDummyIndex = (id < packetId) ? packetId - 2 : packetId - 1;
+                if ((correspondingDummyIndex <= currentLevel.getListOfPlayers().size())) {
+                    currentLevel.addDummyPlayer();
+                }
+                float newX = playerPacket.getX();
+                float newY = playerPacket.getY();
+                currentLevel.getListOfPlayers().get(correspondingDummyIndex).setPosition(newX, newY);
+            }
         }
     }
 
