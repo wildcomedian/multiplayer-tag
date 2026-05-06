@@ -39,7 +39,7 @@ public class Main extends GameBase implements PlayerDieListener, PlayerWinListen
 	}
 
 	@Override
-	public void init() {
+	public synchronized void init() {
 		GameResources.load();
 
 		currentLevelIndex = 0;

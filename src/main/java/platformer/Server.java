@@ -70,7 +70,8 @@ public class Server implements Runnable{
                 connection = listener.accept();
                 int assignedId = nextPlayerId;
                 nextPlayerId++;
-
+                System.out.println("Next Player Id: " + nextPlayerId);
+                System.out.println("Assigned Id: " + assignedId);
                 //first one to connect is it
                 boolean isIt = (assignedId == 1);
                 Packet clientPacket = new Packet(assignedId, 400, 650, isIt);

@@ -15,7 +15,8 @@ import platformer.code.gamelogic.player.Player;
 import java.util.ArrayList;
 
 public class Client extends Main {
-    private static int id = 0;
+    private static int numOfPlayers = 0;
+    private int id;
     Socket socket;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
@@ -24,13 +25,32 @@ public class Client extends Main {
     public static void main(String[] args) {
         Client client = new Client();
         System.out.println("Running Client");
-        client.start("TAG",SCREEN_WIDTH,SCREEN_HEIGHT);
+        Thread clientStarter1 = new Thread() {
+            @Override
+            public void run() {
+                client.start("TAG" + client.getId(), SCREEN_WIDTH, SCREEN_HEIGHT);
+            }
+        };
+
+        Client client2 = new Client();
+        System.out.println("Running Client");
+        Thread clientStarter2 = new Thread() {
+
+            @Override
+            public void run() {
+                client2.start("TAG" + client2.getId(), SCREEN_WIDTH, SCREEN_HEIGHT);
+            }
+        };
+
+        clientStarter1.start();
+        clientStarter2.start();
         System.out.println("Created Window");
     }
 
     public Client() {
-        id++;
-
+        numOfPlayers++;
+        id = numOfPlayers;
+        System.out.println("Assigned Id" + id);
         try {
             //Setting up connection to server
             String host = "localhost";
@@ -71,8 +91,7 @@ public class Client extends Main {
             while (connected) {
                 try {
                     ArrayList<Packet> serverPackets = (ArrayList<Packet>) ois.readObject();
-                    if (serverPackets.size() != 1)
-                        updateDummyPlayers(serverPackets);
+                    updateDummyPlayers(serverPackets);
                 } catch (ClassNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -96,20 +115,26 @@ public class Client extends Main {
     public void updateDummyPlayers(ArrayList<Packet> playerPackets) {
         for (Packet playerPacket: playerPackets) {
             int packetId = playerPacket.getPlayerId();
-            if ((currentLevel != null) && (packetId != id)) {
-                int correspondingDummyIndex = (id < packetId) ? packetId - 2 : packetId - 1;
-                if ((correspondingDummyIndex <= currentLevel.getListOfPlayers().size())) {
+            if (currentLevel != null) {
+                int correspondingDummyIndex = packetId - 1;
+                if ((correspondingDummyIndex >= currentLevel.getListOfPlayers().size())) {
                     currentLevel.addDummyPlayer();
                 }
                 float newX = playerPacket.getX();
                 float newY = playerPacket.getY();
-                currentLevel.getListOfPlayers().get(correspondingDummyIndex).setPosition(newX, newY);
+                float newVectorX = playerPacket.getMovementX();
+                float newVectorY = playerPacket.getMovementY();
+                currentLevel.getListOfPlayers().get(correspondingDummyIndex).setPosition(newX, newY, newVectorX, newVectorY);
             }
         }
     }
 
     private Packet makePacket() {
-        return new Packet(this.id, currentLevel.getPlayer().getX(), currentLevel.getPlayer().getY(), false);
+        return new Packet(this.id, currentLevel.getPlayer().getX(), currentLevel.getPlayer().getY(), false, currentLevel.getPlayer().getMovementX(), currentLevel.getPlayer().getMovementY());
+    }
+
+    public int getId() {
+        return id;
     }
 
 }

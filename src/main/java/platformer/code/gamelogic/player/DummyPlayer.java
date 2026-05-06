@@ -42,8 +42,32 @@ public class DummyPlayer extends PhysicsObject{
 		hitbox.draw(g);
 	}
 	
-	public void setPosition(float x, float y) {
-		position.x = x;
-		position.y = y;
+	public void setPosition(float x, float y, float originalPlayerMovementX, float originalPlayerMovementY) {
+		int correctionX;
+		int correctionY;
+		if (originalPlayerMovementX > 0) {
+			correctionX = 15;
+		}
+		else if (originalPlayerMovementX < 0) {
+			correctionX = -15;
+		}
+		else {
+			correctionX = 0;
+		}
+
+		if (originalPlayerMovementY > 0) {
+			correctionY = 20;
+		}
+		else if (originalPlayerMovementY < 0) {
+			correctionY = -20;
+		}
+		else {
+			correctionY = 0;
+		}
+
+		position.x = x + correctionX;
+		position.y = y + correctionY;
 	}
+
+
 }

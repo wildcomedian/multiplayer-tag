@@ -31,21 +31,23 @@ public abstract class GameBase {
 	 * @param height The height of the window
 	 */
 	public void start(String title, int width, int height) {
-		window = new MyWindow(title, width, height);
-
-		//Adding inputManagers to window
-		window.addKeyListener(new KeyboardInputManager());
-		MouseInputManager mouseInputManager = new MouseInputManager(window);
-		window.addMouseListener(mouseInputManager);
-		window.addMouseMotionListener(mouseInputManager);
-		window.addMouseWheelListener(mouseInputManager);
-		
-		long StartOfInit = System.currentTimeMillis();
-		init(); //Calling method init() in the sub-class
-		long StartOfGame = System.currentTimeMillis();
-		System.out.println("Time needed for initialization: [" + (StartOfGame - StartOfInit) + "ms]");
-		
-		long lastFrame = System.currentTimeMillis();
+		synchronized (this) {
+			window = new MyWindow(title, width, height);
+			
+			//Adding inputManagers to window
+			window.addKeyListener(new KeyboardInputManager());
+			MouseInputManager mouseInputManager = new MouseInputManager(window);
+			window.addMouseListener(mouseInputManager);
+			window.addMouseMotionListener(mouseInputManager);
+			window.addMouseWheelListener(mouseInputManager);
+			
+		}
+			long StartOfInit = System.currentTimeMillis();
+			init(); //Calling method init() in the sub-class
+			long StartOfGame = System.currentTimeMillis();
+			System.out.println("Time needed for initialization: [" + (StartOfGame - StartOfInit) + "ms]");
+			
+			long lastFrame = System.currentTimeMillis();
 
 		while(true) {
 			lastFrame = System.currentTimeMillis();

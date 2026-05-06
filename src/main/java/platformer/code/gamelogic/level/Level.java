@@ -227,10 +227,13 @@ public class Level {
 		// Draw the player
 		player.draw(g);
 
-		//Draw the dummy players
-		for (DummyPlayer dp: listOfPlayers) {
-			dp.draw(g);
+		synchronized (this) {
+			//Draw the dummy players
+			for (DummyPlayer dp: listOfPlayers) {
+				dp.draw(g);
+			}
 		}
+		
 
 		// used for debugging
 		if (Camera.SHOW_CAMERA)
