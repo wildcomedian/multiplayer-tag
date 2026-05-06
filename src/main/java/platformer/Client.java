@@ -6,13 +6,13 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.logging.Level;
 
 import platformer.code.gamelogic.Main;
+import java.util.logging.Level;
 import platformer.code.gamelogic.player.DummyPlayer;
 import platformer.code.gamelogic.player.Player;
+
+import java.util.ArrayList;
 
 public class Client extends Main {
     private static int id = 0;
@@ -41,15 +41,17 @@ public class Client extends Main {
             //Creating and starting PacketInputHandler to read packets from the connected server
             PacketInputHandler inputHandler = new PacketInputHandler();
             inputHandler.start();
-            //Creating a thread to constanty just send the client's packet (player status)
+            //Creating a thread to constantly just send the client's packet (player status)
             Thread clientMessengerThread = new Thread() {
+                private float prevX = 0;
+                private float prevY = 0;
                 @Override
                 public void run() {
                     while (connected) {
-                        if (currentLevel != null) {
-                            Packet clientPacket = new Packet(id, currentLevel.getPlayer().getX(),
-                                currentLevel.getPlayer().getY(), false);
-                            sendPacket(clientPacket);
+                        if ((currentLevel != null) && ((currentLevel.getPlayer().getX() != prevX) || (currentLevel.getPlayer().getY() != prevY))) {
+                            prevX = currentLevel.getPlayer().getX();
+                            prevY = currentLevel.getPlayer().getY();
+                            sendPacket(makePacket());
                         }
                     }
                     System.out.println("No longer connected");
@@ -57,7 +59,6 @@ public class Client extends Main {
             };
             clientMessengerThread.start();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             connected = false;
         }
@@ -68,13 +69,15 @@ public class Client extends Main {
         public void run() {
             while (connected) {
                 try {
-                    Packet serverPacket = (Packet) ois.readObject();
-                    System.out.println(serverPacket);
+                    ArrayList<Packet> serverPackets = (ArrayList<Packet>) ois.readObject();
+                    Packet serverPacket = serverPackets.get(id - 1);
+                    // System.out.println(serverPacket);
                     // Do Stuff with serverPacket figure out
                     int packetId = serverPacket.getPlayerId();
                     float newX = serverPacket.getX();
                     float newY = serverPacket.getY();
-                    currentLevel.getListOfPlayers().get(packetId-1).setPosition(newX, newY);;
+                  
+                    currentLevel.getListOfPlayers().get(packetId-1).setPosition(newX, newY);
                 } catch (ClassNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -98,6 +101,5 @@ public class Client extends Main {
     private Packet makePacket() {
         return new Packet(this.id, currentLevel.getPlayer().getX(), currentLevel.getPlayer().getY(), false);
     }
-
 
 }

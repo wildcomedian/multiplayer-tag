@@ -2,12 +2,12 @@ package platformer;
 import java.io.Serializable;
 
 public class Packet implements Serializable {
-    
+    private static final long serialVersionUID = 1L;
     private int playerId;
     private float x;
     private float y;
     private boolean isIt;
-    
+        
     public Packet(int playerId, float x, float y, boolean isIt){
         this.playerId = playerId;
         this.x = x;
@@ -25,6 +25,7 @@ public class Packet implements Serializable {
         return y; 
         
     }
+    
     public boolean isIt(){
         return isIt;
     }

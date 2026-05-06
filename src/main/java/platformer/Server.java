@@ -10,6 +10,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import platformer.code.gameengine.input.KeyboardInputManager;
 import platformer.code.gameengine.loaders.LeveldataLoader;
@@ -22,7 +25,6 @@ import platformer.code.gamelogic.level.PlayerDieListener;
 import platformer.code.gamelogic.level.PlayerWinListener;
 import platformer.code.gamelogic.player.DummyPlayer;
 import platformer.code.gamelogic.player.Player;
-
 
 public class Server implements Runnable{
     public static final int PORT = 2017;
@@ -135,21 +137,26 @@ public class Server implements Runnable{
             //Level.listOfPlayers.add(new Player(400 ,650 , level));
             try {
                 oos = new ObjectOutputStream(client.getOutputStream());
-                ois = new ObjectInputStream(client.getInputStream());
+                ois = new ObjectInputStream(client.getInputStream());             
             }
             catch(Exception e){
+                // TODO: handle exception
+                e.printStackTrace();
             }
+            /* Creates and executes (runs) a thread to send the client the other players positions */
+            Runnable task = () -> sendPositions(); // Creates a runnable task: Calling sendPositions
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(); //Makes this ScheduledExecutorService to start running a task at fixed intervals
+            scheduler.scheduleAtFixedRate(task, 1000, 1000/60, TimeUnit.MILLISECONDS); //Sets the scheduler to run the sendPositions task every 1 millisecond, starting after 1000 milliseconds (1 second)
         }
  
-        public void sendPackets() {
-            for (Packet p: playerPositions) {
-                try {
-                    oos.writeObject(p);
-                    //oos.flush();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+        public void sendPositions() {
+            try {
+                oos.writeObject(playerPositions);
+                oos.flush();
+                oos.reset(); //Needed so that oos doesn't send a version of playerPositions that hasn't been updated
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
  
@@ -157,17 +164,14 @@ public class Server implements Runnable{
             String clientAddress = client.getInetAddress().toString();
             while(true) {
                 try {
-                    //Getting and unpacking client data into variables
+                    /* Getting and unpacking client data */
                     Packet clientInfo = (Packet) ois.readObject();
-                    System.out.println(clientInfo);
-                    //find the player and update their packet
+                    //finds the player and update their packet
                     boolean wasIt = playerPositions.get(assignedId - 1).isIt();
                     clientInfo.setIt(wasIt);
                     playerPositions.set(assignedId - 1, clientInfo);
-    
                     //we need to do server updating of game here checking for collisions and tag logic before broadcasting
                     //checkTagCollisions();
-                    sendPackets();
                 }
                 catch(EOFException e){
                     System.out.println("the client disconnected, bye!!!");

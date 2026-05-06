@@ -11,15 +11,9 @@ import platformer.code.gamelogic.level.Level;
 import platformer.code.gamelogic.tiles.Tile;
 
 public class DummyPlayer extends PhysicsObject{
-	public float walkSpeed = 400;
-	public float jumpPower = 1350;
-
-	private boolean isJumping = false;
 	private static int id = 0;
 	
-
 	public DummyPlayer(float x, float y, Level level) {
-	
 		super(x, y, level.getLevelData().getTileSize(), level.getLevelData().getTileSize(), level);
 		int offset =(int)(level.getLevelData().getTileSize()*0.1); //hitbox is offset by 10% of the player size.
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
@@ -48,22 +42,8 @@ public class DummyPlayer extends PhysicsObject{
 		hitbox.draw(g);
 	}
 	
-	@Override
-	public void update(float tslf) {
-		super.update(tslf);
-		
-		isJumping = true;
-		if(collisionMatrix[BOT] != null) isJumping = false;
-	}
-	
-	public void setMovementVector(float x, float y) {
-		movementVector.x = x;
-		movementVector.y = y;
-	}
-	
 	public void setPosition(float x, float y) {
 		position.x = x;
 		position.y = y;
-		
 	}
 }
