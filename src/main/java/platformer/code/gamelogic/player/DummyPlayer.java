@@ -11,13 +11,18 @@ import platformer.code.gamelogic.level.Level;
 import platformer.code.gamelogic.tiles.Tile;
 
 public class DummyPlayer extends PhysicsObject{
-	private static int id = 0;
+	private static int nextId = 1;
+	private int id = 0;
+	public boolean tagMode;
 	
 	public DummyPlayer(float x, float y, Level level) {
 		super(x, y, level.getLevelData().getTileSize(), level.getLevelData().getTileSize(), level);
 		int offset =(int)(level.getLevelData().getTileSize()*0.1); //hitbox is offset by 10% of the player size.
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
-		id++;
+		id = nextId;
+		nextId++;
+
+		tagMode = (id == 1) ? true : false; 
 	}
 
 	public int getId(){
@@ -26,7 +31,12 @@ public class DummyPlayer extends PhysicsObject{
 
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.BLUE);
+		if (tagMode == true) {
+			g.setColor(Color.ORANGE);
+		}
+		else {
+			g.setColor(Color.BLUE);
+		}
 		MyGraphics.fillRectWithOutline(g, (int)getX(), (int)getY(), width, height);
 		
 		if(Main.DEBUGGING) {

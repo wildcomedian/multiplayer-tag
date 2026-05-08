@@ -92,6 +92,9 @@ public class Client extends Main {
                 try {
                     ArrayList<Packet> serverPackets = (ArrayList<Packet>) ois.readObject();
                     updateDummyPlayers(serverPackets);
+                    if (currentLevel != null && currentLevel.getPlayer().isIt() == true) {
+                        currentLevel.getPlayer().isIt = currentLevel.isPlayerTagging();
+                    }
                 } catch (ClassNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -130,7 +133,7 @@ public class Client extends Main {
     }
 
     private Packet makePacket() {
-        return new Packet(this.id, currentLevel.getPlayer().getX(), currentLevel.getPlayer().getY(), false, currentLevel.getPlayer().getMovementX(), currentLevel.getPlayer().getMovementY());
+        return new Packet(this.id, currentLevel.getPlayer().getX(), currentLevel.getPlayer().getY(), currentLevel.getPlayer().isIt(), currentLevel.getPlayer().getMovementX(), currentLevel.getPlayer().getMovementY());
     }
 
     public int getId() {

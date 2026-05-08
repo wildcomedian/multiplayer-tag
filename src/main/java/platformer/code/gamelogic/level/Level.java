@@ -264,7 +264,7 @@ public class Level {
 		winListeners.add(listener);
 	}
 	//------------------------TAG
-	public boolean playerTagging() {
+	public boolean isPlayerTagging() {
 		for (int i = 0; i < listOfPlayers.size(); i++) {
 			if ((i != player.getId() - 1) && (player.getHitbox().isIntersecting(listOfPlayers.get(i).getHitbox()))) {
 				return true;
