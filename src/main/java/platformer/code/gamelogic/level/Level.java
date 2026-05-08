@@ -1,4 +1,4 @@
-package platformer.code.gamelogic.level;
+ package platformer.code.gamelogic.level;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -262,6 +262,15 @@ public class Level {
 
 	public void addPlayerWinListener(PlayerWinListener listener) {
 		winListeners.add(listener);
+	}
+	//------------------------TAG
+	public boolean playerTagging() {
+		for (int i = 0; i < listOfPlayers.size(); i++) {
+			if ((i != player.getId() - 1) && (player.getHitbox().isIntersecting(listOfPlayers.get(i).getHitbox()))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ---------------------------------------------------------Getters
