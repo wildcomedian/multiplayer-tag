@@ -1,4 +1,4 @@
-package platformer.code.gamelogic.level;
+ package platformer.code.gamelogic.level;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -27,8 +27,8 @@ public class Level {
 	private LevelData leveldata;
 	private Map map;
 	private Enemy[] enemies;
-	public static Player player;
-	public static ArrayList<DummyPlayer> listOfPlayers = new ArrayList<DummyPlayer>();
+	public Player player;
+	public ArrayList<DummyPlayer> listOfPlayers = new ArrayList<DummyPlayer>();
 	private Camera camera;
 
 	private boolean active;
@@ -54,7 +54,6 @@ public class Level {
 		width = mapdata.getWidth();
 		height = mapdata.getHeight();
 		tileSize = mapdata.getTileSize();
-		listOfPlayers.add(new DummyPlayer(leveldata.getPlayerX(), leveldata.getPlayerY(), this));
 		restartLevel();
 	}
 
@@ -132,6 +131,7 @@ public class Level {
 		}
 		player = new Player(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),
 				this);
+
 		camera.setFocusedObject(player);
 
 		active = true;
@@ -154,11 +154,7 @@ public class Level {
 	public void update(float tslf) {
 		if (active) {
 			// Update the player
-			if (listOfPlayers.size() > 0) {
-				for (DummyPlayer dp: listOfPlayers) {
-					dp.update(tslf);
-				}
-			}
+			player.update(tslf);
 
 			// Player death
 			if (map.getFullHeight() + 100 < player.getY())
@@ -231,6 +227,14 @@ public class Level {
 		// Draw the player
 		player.draw(g);
 
+		synchronized (this) {
+			//Draw the dummy players
+			for (DummyPlayer dp: listOfPlayers) {
+				dp.draw(g);
+			}
+		}
+		
+
 		// used for debugging
 		if (Camera.SHOW_CAMERA)
 			camera.draw(g);
@@ -259,6 +263,15 @@ public class Level {
 	public void addPlayerWinListener(PlayerWinListener listener) {
 		winListeners.add(listener);
 	}
+	//------------------------TAG
+	public boolean isPlayerTagging() {
+		for (int i = 0; i < listOfPlayers.size(); i++) {
+			if ((i != player.getId() - 1) && (player.getHitbox().isIntersecting(listOfPlayers.get(i).getHitbox()))) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	// ---------------------------------------------------------Getters
 	public boolean isActive() {
@@ -284,4 +297,8 @@ public class Level {
     public ArrayList<DummyPlayer> getListOfPlayers() {
         return listOfPlayers;
     }
+
+	public void addDummyPlayer() {
+		listOfPlayers.add(new DummyPlayer(leveldata.getPlayerX() * map.getTileSize(), leveldata.getPlayerY() * map.getTileSize(),this));
+	}
 }

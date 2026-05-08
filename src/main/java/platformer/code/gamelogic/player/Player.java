@@ -15,14 +15,18 @@ public class Player extends PhysicsObject{
 	public float jumpPower = 1350;
 
 	private boolean isJumping = false;
-	private static int id = 0;
+	public boolean isIt;
+	private int id;
+	private static int nextId = 1;
 
 	public Player(float x, float y, Level level) {
-	
 		super(x, y, level.getLevelData().getTileSize(), level.getLevelData().getTileSize(), level);
 		int offset =(int)(level.getLevelData().getTileSize()*0.1); //hitbox is offset by 10% of the player size.
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
-		id++;
+		id = nextId;
+		nextId++;
+		
+		isIt = id == 1 ? true : false;
 	}
 
 	@Override
@@ -47,7 +51,12 @@ public class Player extends PhysicsObject{
 
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.YELLOW);
+		if (isIt == true) {
+			g.setColor(Color.RED);
+		}
+		else {
+			g.setColor(Color.YELLOW);
+		}
 		MyGraphics.fillRectWithOutline(g, (int)getX(), (int)getY(), width, height);
 		
 		if(Main.DEBUGGING) {
@@ -61,5 +70,14 @@ public class Player extends PhysicsObject{
 		}
 		
 		hitbox.draw(g);
+	}
+
+	public int getId(){
+		return id;
+	}
+
+	public boolean isIt() {
+		// TODO Auto-generated method stub
+		return isIt;
 	}
 }
