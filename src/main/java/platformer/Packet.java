@@ -9,6 +9,7 @@ public class Packet implements Serializable {
     private boolean isIt;
     private float movementVectorX;
     private float movementVectorY;
+
         
     public Packet(int playerId, float x, float y, boolean isIt){
         this.playerId = playerId;

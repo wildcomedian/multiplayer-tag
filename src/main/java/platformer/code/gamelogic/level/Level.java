@@ -227,12 +227,11 @@ public class Level {
 		// Draw the player
 		player.draw(g);
 
-		synchronized (this) {
+
 			//Draw the dummy players
 			for (DummyPlayer dp: listOfPlayers) {
 				dp.draw(g);
 			}
-		}
 		
 
 		// used for debugging
@@ -264,12 +263,11 @@ public class Level {
 		winListeners.add(listener);
 	}
 	//------------------------TAG
-	public boolean isPlayerTagging() {
-		for (int i = 0; i < listOfPlayers.size(); i++) {
-			if ((i != player.getId() - 1) && (player.getHitbox().isIntersecting(listOfPlayers.get(i).getHitbox()))) {
+	public boolean gettingTagged(int itId) {
+			if (player.getHitbox().isIntersecting(listOfPlayers.get(itId - 1).getHitbox())) {
+				System.out.println("Getting Tagged");
 				return true;
 			}
-		}
 		return false;
 	}
 

@@ -32,14 +32,14 @@ public class Server implements Runnable{
     private ServerSocket listener;
     private Socket connection;
     private static ArrayList<ConnectionHandler> handlers = new ArrayList<ConnectionHandler>();
-    private boolean serverRunning;
+    private static boolean serverRunning;
 
     
     //list of packets received from players
     private static ArrayList<Packet> playerPositions = new ArrayList<Packet>();
 
     //update to give new id
-    private static int nextPlayerId = 1;
+    private int nextPlayerId = 1;
     private static int itId = 1;
 
     // stops instant re-tagging
@@ -58,8 +58,8 @@ public class Server implements Runnable{
     @Override
     public void run() {
         try {
-            listener = new ServerSocket(PORT);
             serverRunning = true;
+            listener = new ServerSocket(PORT);
             System.out.println("Server listening on port  " + PORT);
 
             Runnable task = () -> broadcastAllPlayers(); // Creates a runnable task: Calling sendPositions
@@ -73,7 +73,7 @@ public class Server implements Runnable{
                 System.out.println("Next Player Id: " + nextPlayerId);
                 System.out.println("Assigned Id: " + assignedId);
                 //first one to connect is it
-                boolean isIt = (assignedId == 1);
+                boolean isIt = (assignedId == itId);
                 Packet clientPacket = new Packet(assignedId, 400, 650, isIt);
                 playerPositions.add(clientPacket);
 
@@ -82,6 +82,7 @@ public class Server implements Runnable{
                 handler.start();
                 System.out.println("Player " + assignedId + " connected.");
             }
+
         } catch (IOException e) {
                 shutdown();
         }
@@ -136,7 +137,8 @@ public class Server implements Runnable{
             //Level.listOfPlayers.add(new Player(400 ,650 , level));
             try {
                 oos = new ObjectOutputStream(client.getOutputStream());
-                ois = new ObjectInputStream(client.getInputStream());             
+                ois = new ObjectInputStream(client.getInputStream());
+                oos.writeInt(assignedId);      
             }
             catch(Exception e){
                 // TODO: handle exception
@@ -162,8 +164,10 @@ public class Server implements Runnable{
                     /* Getting and unpacking client data */
                     Packet clientInfo = (Packet) ois.readObject();
                     //finds the player and update their packet
-                    boolean wasIt = playerPositions.get(assignedId - 1).isIt();
-                    clientInfo.setIt(wasIt);
+                    if ((assignedId != itId) && (clientInfo.isIt())) {
+                        switchItId(assignedId);
+                        
+                    }
                     playerPositions.set(assignedId - 1, clientInfo);
                     //we need to do server updating of game here checking for collisions and tag logic before broadcasting
                     //checkTagCollisions();
@@ -185,7 +189,6 @@ public class Server implements Runnable{
             try {
                 //dont want people sitting there when they leave
                 handlers.remove(this);
-                playerPositions.remove(assignedId - 1);
                 if (!client.isClosed()) {
                     oos.close();
                     ois.close();
@@ -195,6 +198,12 @@ public class Server implements Runnable{
                 // TODO: handle exception
             }
         }
+    }
+
+    public static synchronized void switchItId(int newItId) {
+        playerPositions.get(newItId - 1).setIt(true);
+        playerPositions.get(itId - 1).setIt(false);
+        itId = newItId;
     }
 }
 

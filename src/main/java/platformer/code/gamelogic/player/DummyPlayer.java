@@ -22,7 +22,7 @@ public class DummyPlayer extends PhysicsObject{
 		id = nextId;
 		nextId++;
 
-		tagMode = (id == 1) ? true : false; 
+		tagMode = false; 
 	}
 
 	public int getId(){
@@ -31,11 +31,9 @@ public class DummyPlayer extends PhysicsObject{
 
 	@Override
 	public void draw(Graphics g) {
+		g.setColor(Color.BLUE);
 		if (tagMode == true) {
-			g.setColor(Color.ORANGE);
-		}
-		else {
-			g.setColor(Color.BLUE);
+			g.setColor(Color.BLACK);
 		}
 		MyGraphics.fillRectWithOutline(g, (int)getX(), (int)getY(), width, height);
 		

@@ -15,8 +15,7 @@ import platformer.code.gamelogic.player.Player;
 import java.util.ArrayList;
 
 public class Client extends Main {
-    private static int numOfPlayers = 0;
-    private int id;
+    private int myId;
     Socket socket;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
@@ -25,32 +24,12 @@ public class Client extends Main {
     public static void main(String[] args) {
         Client client = new Client();
         System.out.println("Running Client");
-        Thread clientStarter1 = new Thread() {
-            @Override
-            public void run() {
-                client.start("TAG" + client.getId(), SCREEN_WIDTH, SCREEN_HEIGHT);
-            }
-        };
-
-        Client client2 = new Client();
-        System.out.println("Running Client");
-        Thread clientStarter2 = new Thread() {
-
-            @Override
-            public void run() {
-                client2.start("TAG" + client2.getId(), SCREEN_WIDTH, SCREEN_HEIGHT);
-            }
-        };
-
-        clientStarter1.start();
-        clientStarter2.start();
+        client.start("TAG" + client.getId(), SCREEN_WIDTH, SCREEN_HEIGHT);
         System.out.println("Created Window");
     }
 
     public Client() {
-        numOfPlayers++;
-        id = numOfPlayers;
-        System.out.println("Assigned Id" + id);
+        
         try {
             //Setting up connection to server
             String host = "localhost";
@@ -59,6 +38,9 @@ public class Client extends Main {
             ois = new ObjectInputStream(socket.getInputStream());
             connected = true;
             
+            myId = ois.readInt();
+            System.out.println("Assigned myId: " + myId);
+
             //Creating and starting PacketInputHandler to read packets from the connected server
             PacketInputHandler inputHandler = new PacketInputHandler();
             inputHandler.start();
@@ -92,16 +74,14 @@ public class Client extends Main {
                 try {
                     ArrayList<Packet> serverPackets = (ArrayList<Packet>) ois.readObject();
                     updateDummyPlayers(serverPackets);
-                    if (currentLevel != null && currentLevel.getPlayer().isIt() == true) {
-                        currentLevel.getPlayer().isIt = currentLevel.isPlayerTagging();
-                    }
+                    updateItStatus(serverPackets);
                 } catch (ClassNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                }
+                }     
             }
         }
     }
@@ -115,29 +95,52 @@ public class Client extends Main {
         }
     }
 
+    public void updateItStatus(ArrayList<Packet> serverPackets) {
+        Packet myPacket = serverPackets.get(myId - 1);
+        
+        boolean itStatus = myPacket.isIt();
+        if (currentLevel != null) {
+            currentLevel.getPlayer().isIt = itStatus;
+            currentLevel.getListOfPlayers().get(myId - 1).tagMode = itStatus;
+        }
+    }
+
     public void updateDummyPlayers(ArrayList<Packet> playerPackets) {
         for (Packet playerPacket: playerPackets) {
             int packetId = playerPacket.getPlayerId();
             if (currentLevel != null) {
+
                 int correspondingDummyIndex = packetId - 1;
-                if ((correspondingDummyIndex >= currentLevel.getListOfPlayers().size())) {
+                if ((playerPackets.size() > currentLevel.getListOfPlayers().size())) {
                     currentLevel.addDummyPlayer();
                 }
+                
                 float newX = playerPacket.getX();
                 float newY = playerPacket.getY();
                 float newVectorX = playerPacket.getMovementX();
                 float newVectorY = playerPacket.getMovementY();
                 currentLevel.getListOfPlayers().get(correspondingDummyIndex).setPosition(newX, newY, newVectorX, newVectorY);
+                
+                if (playerPacket.isIt() && currentLevel.gettingTagged(packetId)) {
+                    currentLevel.getPlayer().isIt = true;
+                    currentLevel.getListOfPlayers().get(myId - 1).tagMode = true;
+                }
+                if (playerPacket.isIt()) {
+                    currentLevel.getListOfPlayers().get(correspondingDummyIndex).tagMode = true;
+                }
+                else {
+                    currentLevel.getListOfPlayers().get(correspondingDummyIndex).tagMode = false;
+                }
             }
         }
     }
 
     private Packet makePacket() {
-        return new Packet(this.id, currentLevel.getPlayer().getX(), currentLevel.getPlayer().getY(), currentLevel.getPlayer().isIt(), currentLevel.getPlayer().getMovementX(), currentLevel.getPlayer().getMovementY());
+        return new Packet(this.myId, currentLevel.getPlayer().getX(), currentLevel.getPlayer().getY(), currentLevel.getPlayer().isIt(), currentLevel.getPlayer().getMovementX(), currentLevel.getPlayer().getMovementY());
     }
 
     public int getId() {
-        return id;
+        return myId;
     }
 
 }
